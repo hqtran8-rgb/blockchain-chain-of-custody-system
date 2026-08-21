@@ -1,0 +1,89 @@
+GROUP 24 - BLOCKCHAIN CHAIN OF CUSTODY SYSTEM
+
+Group Members:
+
+Hung Tran         ASU ID: 1228535973  hqtran8@asu.edu
+Ananya Arora      ASU ID: 1225365089  aarora86@asu.edu
+Anannya Reddy Gade ASU ID: 1228591275  agade4@asu.edu
+Amir Boshra       ASU ID: 1225700515  aboshra@asu.edu
+Raine Huang       ASU ID: 1228137523  rhuang47@asu.edu
+
+
+Brief Description:
+
+This is a blockchain-based evidence chain of custody system which can record all evidence
+actions as immutable blocks in a binary file. Actions such as add, checkout, checkin, remove - 
+creates a new block linked via SHA-256 hashes which makes tampering detectable.
+
+
+How everything works:
+
+Five main components:
+
+1. block.py - This file contains block structure with binary packing 
+2. blockchain.py - This has multiple components like file management, validation and hash chain verification
+3. crypto_utils.py - AES-ECB encryption for case IDs
+4. commands.py - This is the command implementations
+5. bchoc.py - CLI interface 
+
+The case IDs (UUID) and item IDs (integers) are encrypted before storing.
+Each block stores: previous hash, timestamp, encrypted IDs, state, creator, 
+owner, & optional data.
+
+
+Installation:
+
+pip install pycryptodome --break-system-packages
+make
+
+
+Commands:
+
+./bchoc init
+./bchoc add -c <case_id> -i <item_id> -g <creator> -p C67C
+./bchoc checkout -i <item_id> -p <password>
+./bchoc checkin -i <item_id> -p <password>
+./bchoc remove -i <item_id> -y <DISPOSED|DESTROYED|RELEASED> -p C67C
+./bchoc show cases
+./bchoc show items -c <case_id>
+./bchoc show history [-c <case_id>] [-i <item_id>] [-n <num>] [-r] -p <password>
+./bchoc verify
+./bchoc summary -c <case_id>
+
+
+Passwords:
+
+C67C - CREATOR (required for add/remove)
+P80P - POLICE
+L76L - LAWYER
+A65A - ANALYST
+E69E - EXECUTIVE
+
+
+State Rules:
+
+- New items: CHECKEDIN
+- Checkout only if CHECKEDIN
+- Checkin only if CHECKEDOUT
+- Remove only if CHECKEDIN
+- No actions after DISPOSED/DESTROYED/RELEASED
+
+
+Examples:
+
+./bchoc init
+./bchoc add -c 65cc391d-6568-4dcc-a978-c0a8c5f1f4f9 -i 12345 -g JohnDoe -p C67C
+./bchoc checkout -i 12345 -p A65A
+./bchoc checkin -i 12345 -p L76L
+./bchoc show history -i 12345 -p E69E
+./bchoc verify
+./bchoc summary -c 65cc391d-6568-4dcc-a978-c0a8c5f1f4f9
+./bchoc remove -i 12345 -y DISPOSED -p C67C
+
+
+Technical details:
+
+- File: blockchain.dat
+- Encryption: AES-ECB, 16-byte output as 32-char hex string
+- Hashing: SHA-256
+- Format: Binary (big-endian integers)
